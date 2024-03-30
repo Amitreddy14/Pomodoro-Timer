@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhanced Pomodoro Timer</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  #timer-container {
+    display: flex;
+    justify-content: space-between; /* Align items to the start and end of the container */
+    width: 660px; /* Set a total width for the container */
+  }
+
+  #timer {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: box-shadow 0.3s ease-in-out;
+    width: 300px; /* Set the width of timer box */
+  }
+
+  #timer:hover {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  #timer-display {
+    font-size: 3em;
+    color: #333;
+    transition: color 0.3s ease-in-out;
+  }
+
+  #controls {
+    margin-top: 20px;
+  }
+
+  #controls button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  #controls button:hover {
+    background-color: #45a049;
+  }
+
+  #progress-bar-container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #ddd;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #4caf50;
+    transition: width 0.3s ease-in-out;
+  }
+
+  #session-counter {
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #777;
+    transition: color 0.3s ease-in-out;
+  }
+
+  #session-counter:hover {
+    color: #555;
+  }
+
+  #session-name {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease-in-out;
+  }
+
+  #session-name:focus {
+    border-color: #4caf50;
+  }
+
+  #history {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    flex-grow: 1;
+    overflow-y: auto;
+    transition: box-shadow 0.3s ease-in-out;
+    width: 300px; /* Set the width of session history box */
+  }
+
+  #history::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  #history::-webkit-scrollbar-thumb {
+    background-color: #4caf50;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="timer-container">
+  <div id="timer">
+    <div id="timer-display">25:00</div>
+    <input type="text" id="session-name" placeholder="Enter session name...">
+    <div id="controls">
+      <button id="start">Start</button>
+      <button id="pause">Pause</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div id="progress-bar-container">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="session-counter">Sessions Completed: 0</div>
+  </div>
+
+  <div id="history">
+    <h2>Session History</h2>
+    <ul id="session-list"></ul>
+  </div>
+</div>
+
+<script>
+  let timerInterval;
+  let currentTime = 25 * 60; // Initial duration in seconds
+  let sessionsCompleted = 0;
+  const sessionList = document.getElementById('session-list');
+
+  const timerDisplay = document.getElementById('timer-display');
+  const progressBar = document.getElementById('progress-bar');
+  const sessionCounter = document.getElementById('session-counter');
+
+  function updateTimerDisplay() {
+    const minutes = Math.floor(currentTime / 60);
+    const seconds = currentTime % 60;
+    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function updateProgressBar() {
+    const progress = (currentTime / (25 * 60)) * 100; // Progress based on 25 minutes work duration
+    progressBar.style.width = `${progress}%`;
+  }
+
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      if (currentTime > 0) {
+        currentTime--;
+        updateTimerDisplay();
+        updateProgressBar();
+      } else {
+        clearInterval(timerInterval);
+        sessionsCompleted++;
+        sessionCounter.textContent = `Sessions Completed: ${sessionsCompleted}`;
+        // Handle switching between work and break durations
+        if (sessionsCompleted % 4 === 0) {
+          currentTime = 5 * 60; // Break duration in seconds
+        } else {
+          currentTime = 25 * 60; // Work duration in seconds
+        }
+        updateTimerDisplay();
+        updateProgressBar();
+        const sessionName = document.getElementById('session-name').value;
+        const sessionItem = document.createElement('li');
+        sessionItem.textContent = `${sessionName} - ${sessionsCompleted} Session`;
+        sessionList.appendChild(sessionItem);
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(timerInterval);
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    currentTime = 25 * 60; // Reset to initial work duration
+    sessionsCompleted = 0;
+    updateTimerDisplay();
+    updateProgressBar();
+    sessionCounter.textContent = `Sessions Completed: ${sessionsCompleted}`;
+    sessionList.innerHTML = '';
+  }
+
+  document.getElementById('start').addEventListener('click', startTimer);
+  document.getElementById('pause').addEventListener('click', pauseTimer);
+  document.getElementById('reset').addEventListener('click', resetTimer);
+
+  // Start timer when Enter key is pressed in session name input
+  document.getElementById('session-name').addEventListener('keyup', function(event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      startTimer();
+    }
+  });
+</script>
+
+</body>
+</html>

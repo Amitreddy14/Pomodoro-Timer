@@ -12,9 +12,9 @@ Session history view (optional)
 
 **Technologies Used** :
 
-JavaScript
-HTML
-CSS
+JavaScript,
+ HTML,
+ CSS.
 
 **How to Use** :
 
